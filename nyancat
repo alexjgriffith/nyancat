@@ -71,7 +71,6 @@ pp_line_cmd='pygmentize -g -O style=[style],linenos=1 [file]'
 # Pretty Print Command with lines at line
 pp_at_line_cmd='pygmentize -g -O style=[style],linenos=1 [file] | sed -n [line]p'
 # Print help if 1
-help=0
 
 # Styles available in the latest Pygments
 # Pygments version 2.13.0, (c) 2006-2022 by Georg Brandl, Matthäus Chajdas and contributors.
@@ -182,10 +181,12 @@ print_example (){
     echo -e $c_example_text | sed s/\\[style\\]/$style/g | sed -e "s;\\[cmd\\];$cmd;g" > /tmp/nyancat.c
 }
 
+nofile=0
+
 if [ $example -eq 1 ]; then # the -x arg is passed in always print example
     print_example
 elif [ "$file" = "" ]; then # no file arg we should print help
-    help=1
+    nofile=1
     # no file or 
 elif [ "$line" = "" ]; then # file is present but not line print whole file
     print_file
@@ -196,7 +197,7 @@ fi
 if [ $debug -eq 1 ]
 then
     echo -e "$cmd" # in debug mode print the command
-elif [ $help -eq 1 ]
+elif [ $nofile -eq 1 ]
 then
     $cmd # no file or examlpe, print help
 else
