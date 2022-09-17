@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+
+## Edit these to your be your editor of choice
+open_cmd="emacsclient -ct -a emacs [file]"
+open_at_line_cmd="emacsclient -ct -a emacs +[line]:1 [file]"
+
+version="0.1.0"
+
+help="nyancatlo: \n
+    Open file at line.\n\
+\n\
+usage:\n\
+   nyancatlo [?opts] [file] [?line]\
+\n\n\
+opts:\n\
+   -v (--version) Display version of nyancatlo\n\
+   -h (--help) Display this text\n\
+   -d (--debug) Print the open comand unevaluated"
+
+cmd="echo -e $help"
+
+file=""
+
+line=""
+
+debug=0
+
+for i in "$@"
+do
+case $i in
+    -v|--version)
+        echo -e "nyancatlo_v"$version
+        exit 0
+        ;;
+    -h|--help)
+        echo -e $help
+        exit 0
+        ;;
+    -d|--debug)
+        debug=1
+        ;;
+    *)
+        if [ "$file" = "" ]
+        then
+            file=$i
+            cmd=$(echo -e $open_cmd | sed s/\\[file\\]/$file/g)
+        elif [ "$line" = "" ]
+        then
+            line=$i
+            cmd=$(echo -e $open_at_line_cmd | sed s/\\[file\\]/$file/g | sed s/\\[line\\]/$line/g)
+        else
+            echo -e "ERROR: unrecognized arg $i\n"
+            echo -e $help
+            exit
+        fi
+        ;;
+esac
+done
+
+if [ $debug -eq 1 ]
+then
+    echo -e "$cmd"
+else
+    $cmd
+fi

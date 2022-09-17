@@ -1,0 +1,204 @@
+#!/usr/bin/env bash
+
+## source: https://copypastatext.com/nyan-cat-ascii/
+nyancat="\
+ \e[1;31m_________________________________________▄▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▄\e[0m\n\
+ \e[1;31m________________________________________█░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒░░░█\e[0m\n\
+ \e[1;33m________________________________________█░▒▒▒▒▒▒▒▒▒▒▄▀▀▄▒▒▒░░█▄▀▀▄\e[0m\n\
+ \e[1;33m___________________________________▄▄___█░▒▒▒▒▒▒▒▒▒▒█▓▓▓▀▄▄▄▄▀▓▓▓█\e[0m\n\
+ \e[1;32m_________________________________█▓▓█▄▄█░▒▒▒▒▒▒▒▒▒▄▀▓▓▓▓▓▓▓▓▓▓▓▓▀▄\e[0m\n\
+ \e[1;32m__________________________________▀▄▄▓▓█░▒▒▒▒▒▒▒▒▒█▓▓▓▄█▓▓▓▄▓▄█▓▓█\e[0m\n\
+ \e[1;36m______________________________________▀▀█░▒▒▒▒▒▒▒▒▒█▓▒▒▓▄▓▓▄▓▓▄▓▒▒█\e[0m\n\
+ \e[1;36m_______________________________________▄█░░▒▒▒▒▒▒▒▒▒▀▄▓▓▀▀▀▀▀▀▀▓▄▀\e[0m\n\
+ \e[1;35m_____________________________________▄▀▓▀█▄▄▄▄▄▄▄▄▄▄▄▄██████▀█▀▀\e[0m\n\
+ \e[1;35m_____________________________________█▄▄▀_█▄▄▀_______█▄▄▀_▀▄▄█\e[0m\n\
+"
+
+help="\n
+\e[1musage:\e[0m\tnyancat [?opts] [file] [?line]\n\n
+
+\e[1mdescription:\e[0m\n
+\tPretty print source code files in the command line.\n\n
+
+\e[1mdependencies:\e[0m\n
+\tPygments:\t\e[1;35mpip install Pygments\e[0m\n\n
+
+\e[1mopts\e[0m:
+\t-s= (--style=)\t\tThe syntax highlighting style (native)\n
+\t-a (--available-styles)\tList available styles\n
+\t-l (--lines)\t\tInclude line numbers in output\n
+\t-x (--example)\t\tExample code with style\n
+\t-v (--version)\t\tDisplay version of nyancat\n
+\t-d (--debug)\t\tPrint the comand unevaluated\n
+\t-h (--help)\t\tDisplay this text\n\n
+
+\e[1mexamples:\e[0m\n
+\t\e[32m#Print a whole file with syntax highlighting\e[0m\n
+\tnyancat file.c
+\n\n
+\t\e[32m#Print a specific line of a file with syntax highlighting\e[0m\n
+\tnyancat file.c 12
+\n\n
+\t\e[32m#Set the style of the output\e[0m\n
+\tnyancat -s=nord file.c 12\n\n
+
+
+\e[1;36mPowered by Pygments\e[0m"
+
+shorthelp="usage:\tnyancat [?opts] [file] [?line]\n
+\tnyancat -h for help
+"
+
+version="0.1.0"
+# By default show shorthelp
+cmd="echo -e $shorthelp"
+# Default style is native use nyancat -a to list all available styles
+style="native"
+# Target file
+file=""
+# Target line
+line=""
+# Debug mode
+debug=0
+# Show example with style
+example=0
+# Show line numbers?
+lines=0
+# Pretty Print Command
+pp_cmd="pygmentize -g -O style=[style] [file]"
+# Pretty Print Command with lines
+pp_line_cmd='pygmentize -g -O style=[style],linenos=1 [file]'
+# Pretty Print Command with lines at line
+pp_at_line_cmd='pygmentize -g -O style=[style],linenos=1 [file] | sed -n [line]p'
+# Print help if 1
+help=0
+
+# Styles available in the latest Pygments
+# Pygments version 2.13.0, (c) 2006-2022 by Georg Brandl, Matthäus Chajdas and contributors.
+# This should be cleaned up to use the users version of pigments
+available_styles='default \nemacs \nfriendly \nfriendly_grayscale \ncolorful \nautumn \nmurphy \nmanni \nmaterial \nmonokai \nperldoc \npastie \nborland \ntrac \nnative \nfruity \nbw \nvim \nvs \ntango \nrrt \nxcode \nigor \nparaiso-light \nparaiso-dark \nlovelace \nalgol \nalgol_nu \narduino \nrainbow_dash \nabap \nsolarized-dark \nsolarized-light \nsas \nstaroffice \nstata \nstata-light \nstata-dark \ninkpot \nzenburn \ngruvbox-dark \ngruvbox-light \ndracula \none-dark \nlilypond \nnord \nnord-darker \ngithub-dark'
+
+for i in "$@"
+do
+case $i in
+    -v|--version) # print version and exit
+        echo -e "nyancat_v"$version
+        exit 0
+        ;;
+    -h|--help) # print title nyancat help and exit
+        echo -e " \e[1mnyancat:\e[0m cat + syntax highlighting\n"$nyancat$help
+        exit 0
+        ;;
+    -d|--debug) # enable debug mode
+        debug=1
+        ;;
+    -l|--lines) # print lines
+        lines=1
+        ;;
+    -x|--example) # display example code rather than file
+        example=1
+        ;;
+    -s=*|--style=*) # select style, default native
+        style="${i#*=}"
+        ;;
+    -a|--available-styles) # list available styles in Pygments 2.13
+        echo -e $available_styles
+        exit 0
+        ;;
+    *) # Check for file and line
+        if [ "$file" = "" ]
+        then
+            file=$i
+        elif [ "$line" = "" ]
+        then
+            line=$i
+        else # if there are more than two additional args exit on error
+            echo -e "ERROR: unrecognized arg $i\n"
+            echo -e $help
+            exit 1
+        fi
+        ;;
+esac
+done
+
+# Sample C text, used for example
+# In future expand this to other languages
+c_example_text="// nyancat c example for style=[style]\n\
+// [cmd]\n\n\
+#include <stdio.h>\n\
+\n\
+int main (void) {\n\
+\tprintf(\"Hello World!\");\n\
+\treturn 0;\n\
+}"
+
+# Generate the cmd for printing a whole file
+print_file (){
+    cmd_tmp=$pp_cmd
+    if [ $lines -eq 1 ]
+    then
+        cmd_tmp=$pp_line_cmd
+    fi
+    cmd=$(echo -e \
+               $cmd_tmp | \
+              sed s/\\[style\\]/$style/g | \
+              sed s/\\[file\\]/$file/g)
+}
+
+# Generate the cmd for printing a specific line
+# Specific lines are always printed wiht line numbers
+print_line (){
+    cmd=$(echo -e \
+               $pp_at_line_cmd | \
+              sed s/\\[style\\]/$style/g | \
+              sed s/\\[file\\]/$file/g | \
+              sed s/\\[line\\]/$line/g)
+}
+
+# Print an example
+print_example (){
+    # we could pull this logic out as its also present in print_file
+    cmd_tmp=$pp_cmd
+    if [ $lines -eq 1 ]
+    then
+        cmd_tmp=$pp_line_cmd
+    fi
+
+    file="\\/tmp\\/nyancat.c"
+    if [ $debug -eq 1 ]
+    then
+        echo "Printing example: $pp_cmd"
+    fi
+    first=$(echo $cmd_tmp | sed s/\\[style\\]/$style/g)
+    if [ $debug -eq 1 ]
+    then
+        echo "First substitution: $first"
+    fi
+    second=$(echo $first | sed s/\\[file\\]/$file/g)
+    if [ $debug -eq 1 ]
+    then echo "Second substitution: $second"
+    fi
+    cmd=$second
+    echo -e $c_example_text | sed s/\\[style\\]/$style/g | sed -e "s;\\[cmd\\];$cmd;g" > /tmp/nyancat.c
+}
+
+if [ $example -eq 1 ]; then # the -x arg is passed in always print example
+    print_example
+elif [ "$file" = "" ]; then # no file arg we should print help
+    help=1
+    # no file or 
+elif [ "$line" = "" ]; then # file is present but not line print whole file
+    print_file
+else  # file and line are present print single line of file
+    print_line 
+fi
+
+if [ $debug -eq 1 ]
+then
+    echo -e "$cmd" # in debug mode print the command
+elif [ $help -eq 1 ]
+then
+    $cmd # no file or examlpe, print help
+else
+    eval $cmd # eval cmd in all other cases
+fi
