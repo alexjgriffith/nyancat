@@ -1,6 +1,6 @@
 Nyancat cat but with syntax highlighting
 
-![Nyancat](NYANCATACII.png "Nyancat")
+![Nyancat](resources/NYANCATACII.png "Nyancat")
 
 ## Setup
 Clone the repo to wherever you clone your other gihub repos. I clone mine into `~/Github`
