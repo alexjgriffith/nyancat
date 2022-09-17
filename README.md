@@ -1,6 +1,8 @@
-Nyancat cat but with syntax highlighting
-
 ![Nyancat](resources/NYANCATACII.png "Nyancat")
+
+# Nyancat 
+
+I.e, cat but with syntax highlighting
 
 ## Setup
 Clone the repo to wherever you clone your other gihub repos. I clone mine into `~/Github`
@@ -31,15 +33,17 @@ nyancat resources/sample.c
 ## Examples
 
 ``` sh
-nyancat file.c
+nyancat sample.c
+```
+
+![nyancat sample.c](resources/NYANCAT-GIF.gif "Nyancat")
+
+``` sh
+nyancat -l sample.c
 ```
 
 ``` sh
-nyancat -l file.c
-```
-
-``` sh
-nyancat -s=nord file.c
+nyancat -s=nord sample.c
 ```
 
 ``` sh
