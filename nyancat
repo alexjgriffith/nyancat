@@ -108,6 +108,11 @@ case $i in
         if [ "$file" = "" ]
         then
             file=$i
+            if [ ! -f $file ]
+            then
+                echo -e "\e[1;31mError! \e[4;31m$file\e[0m\e[1;31m is not a file.\e[0m"
+                exit 1
+            fi
         elif [ "$line" = "" ]
         then
             line=$i
@@ -133,6 +138,7 @@ int main (void) {\n\
 
 # Generate the cmd for printing a whole file
 print_file (){
+    # test if it is a file
     cmd_tmp=$pp_cmd
     if [ $lines -eq 1 ]
     then
@@ -140,8 +146,8 @@ print_file (){
     fi
     cmd=$(echo -e \
                $cmd_tmp | \
-              sed s/\\[style\\]/$style/g | \
-              sed s/\\[file\\]/$file/g)
+              sed "s;\\[style\\];$style;g" | \
+              sed "s;\\[file\\];$file;g")
 }
 
 # Generate the cmd for printing a specific line
@@ -149,9 +155,9 @@ print_file (){
 print_line (){
     cmd=$(echo -e \
                $pp_at_line_cmd | \
-              sed s/\\[style\\]/$style/g | \
-              sed s/\\[file\\]/$file/g | \
-              sed s/\\[line\\]/$line/g)
+              sed "s;\\[style\\];$style;g" | \
+              sed "s;\\[file\\];$file;g" | \
+              sed "s;\\[line\\];$line;g")
 }
 
 # Print an example
